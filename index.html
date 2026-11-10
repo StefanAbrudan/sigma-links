@@ -71,9 +71,16 @@ footer { margin-top: 30px; text-align: center; color: var(--ink-2); font-size: 1
 footer a { display: inline-block; padding: 8px 10px; text-decoration: underline; text-underline-offset: 4px; }
 /* A small silk still moves upward with CSS; no video or rendering library. */
 .intro { position: fixed; inset: 0; z-index: 10; background: var(--bg); }
-.intro .curtain { position: absolute; inset: -1% 0; z-index: 1; background: #080808 url(img/silk.jpg) center / cover; transform: translateY(0); transition: transform 1000ms cubic-bezier(.65, 0, .22, 1); }
+.intro .curtain { position: absolute; inset: -1% 0; z-index: 1; background: #080808 url(img/silk.jpg) center / cover; transform: translateY(0); clip-path: polygon(0 0,100% 0,100% 100%,85% 100%,70% 100%,60% 100%,50% 100%,40% 100%,30% 100%,15% 100%,0 100%); }
 .intro .curtain::after { content: ""; position: absolute; inset: auto 0 0; height: 80px; background: linear-gradient(transparent, rgba(0,0,0,.6)); }
-.intro.open .curtain { transform: translateY(-102%); }
+.intro.open .curtain { animation: theatre-open 1000ms cubic-bezier(.35, 0, .3, 1) both; }
+@keyframes theatre-open {
+  0% { clip-path: polygon(0 0,100% 0,100% 100%,85% 100%,70% 100%,60% 100%,50% 100%,40% 100%,30% 100%,15% 100%,0 100%); transform: translateY(0); }
+  62% { clip-path: polygon(0 0,100% 0,100% 100%,85% 82%,70% 53%,60% 30%,50% 8%,40% 30%,30% 53%,15% 82%,0 100%); transform: translateY(0); }
+  84% { clip-path: polygon(0 0,100% 0,100% 24%,85% 15%,70% 6%,60% 1%,50% 0%,40% 1%,30% 6%,15% 15%,0 24%); transform: translateY(0); }
+  100% { clip-path: polygon(0 0,100% 0,100% 24%,85% 15%,70% 6%,60% 1%,50% 0%,40% 1%,30% 6%,15% 15%,0 24%); transform: translateY(-27%); }
+}
+
 .intro .mark { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); transform-origin: center; }
 .intro .mark svg { display: block; width: min(360px, 70vw); height: auto; fill: var(--ink); }
 .intro.rise { background: transparent; transition: background 300ms ease 300ms; }
