@@ -13,7 +13,10 @@
 <link rel="canonical" href="https://links.sigmabali.com/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400..500&family=Jost:wght@300;400;500&display=swap">
+<!-- fonts load without holding up the page: text shows at once in a fallback face, then swaps -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400..500&family=Jost:wght@300;400;500&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400..500&family=Jost:wght@300;400;500&display=swap"></noscript>
+<link rel="preload" as="image" href="img/title.webp">
 <link rel="preload" as="image" href="img/candles.jpg">
 <!-- Sigma link-in-bio page for Instagram. Self-contained: no site.css, no scripts. Look follows v6 (ivory, Bodoni Moda + Jost, rouge, pills). -->
 <style>
@@ -66,7 +69,12 @@ main { width: 100%; max-width: 480px; margin: 0 auto; padding: max(28px, env(saf
 
 footer { margin-top: 30px; text-align: center; color: var(--ink-2); font-size: 13px; }
 footer a { display: inline-block; padding: 8px 10px; text-decoration: underline; text-underline-offset: 4px; }
-@media (prefers-reduced-motion: reduce) { .buy { animation: none; } .row { transition: none; } }
+/* opening: the Sigma wordmark appears in the middle of the screen, rises to its place, then everything else appears. CSS only. */
+.top svg { animation: rise 1.4s cubic-bezier(.7, 0, .2, 1) both; transform-origin: 50% 50%; }
+.top p, main > *:not(.top) { animation: appear .6s cubic-bezier(.2, 0, 0, 1) 1.05s both; }
+@keyframes rise { 0% { opacity: 0; transform: translateY(34vh) scale(1.5); } 28%, 52% { opacity: 1; transform: translateY(34vh) scale(1.5); } 100% { opacity: 1; transform: none; } }
+@keyframes appear { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .buy { animation: none; } .row { transition: none; } .top svg, .top p, main > *:not(.top) { animation: none; } }
 </style>
 </head>
 <body>
@@ -92,7 +100,7 @@ footer a { display: inline-block; padding: 8px 10px; text-decoration: underline;
       <span class="txt"><b>Regent Countdown</b><small>New Year's Eve · Regent Canggu · Tickets</small></span>
       <span class="go" aria-hidden="true">→</span>
     </a>
-    <a class="row ink" href="https://wa.me/40770137115?text=Hello%20Sigma%2C%20I%20would%20like%20to%20book%20a%20show.%20My%20event%2C%20date%20and%20place%3A">
+    <a class="row ink" href="https://wa.me/6281776814824?text=Hello%20Sigma%2C%20I%20would%20like%20to%20book%20a%20show.%20My%20event%2C%20date%20and%20place%3A">
       <span class="pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.6a8.5 8.5 0 0 1-12.6 7.4L3.5 20.5l1.5-4.3a8.5 8.5 0 1 1 15.5-4.6Z"/></svg></span>
       <span class="txt"><b>Book a show or enquire</b><small>Chat with us on WhatsApp</small></span>
       <span class="go" aria-hidden="true">→</span>
@@ -120,7 +128,7 @@ footer a { display: inline-block; padding: 8px 10px; text-decoration: underline;
 
   <p class="caps label">Sigma</p>
   <nav class="rows" aria-label="Join and contact">
-    <a class="row" href="https://www.sigmabali.com/portal">
+    <a class="row" href="https://backstage.sigmabali.com/portal">
       <span class="pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.5 5.3 5.8.7-4.3 4 1.1 5.7L12 16.4l-5.1 2.8 1.1-5.7-4.3-4 5.8-.7Z"/></svg></span>
       <span class="txt"><b>Join us</b><small>Artists and crew: sign up on Backstage</small></span>
       <span class="go" aria-hidden="true">→</span>
