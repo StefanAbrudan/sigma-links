@@ -69,17 +69,10 @@ main { width: 100%; max-width: 480px; margin: 0 auto; padding: max(28px, env(saf
 
 footer { margin-top: 30px; text-align: center; color: var(--ink-2); font-size: 13px; }
 footer a { display: inline-block; padding: 8px 10px; text-decoration: underline; text-underline-offset: 4px; }
-/* A small silk still moves upward with CSS; no video or rendering library. */
+/* Curved fabric pleats gather and fold; no video or rendering library. */
 .intro { position: fixed; inset: 0; z-index: 10; background: var(--bg); }
-.intro .curtain { position: absolute; inset: -1% 0; z-index: 1; background: #080808 url(img/silk.jpg) center / cover; transform: translateY(0); clip-path: polygon(0 0,100% 0,100% 100%,85% 100%,70% 100%,60% 100%,50% 100%,40% 100%,30% 100%,15% 100%,0 100%); }
-.intro .curtain::after { content: ""; position: absolute; inset: auto 0 0; height: 80px; background: linear-gradient(transparent, rgba(0,0,0,.6)); }
-.intro.open .curtain { animation: theatre-open 1000ms cubic-bezier(.35, 0, .3, 1) both; }
-@keyframes theatre-open {
-  0% { clip-path: polygon(0 0,100% 0,100% 100%,85% 100%,70% 100%,60% 100%,50% 100%,40% 100%,30% 100%,15% 100%,0 100%); transform: translateY(0); }
-  62% { clip-path: polygon(0 0,100% 0,100% 100%,85% 82%,70% 53%,60% 30%,50% 8%,40% 30%,30% 53%,15% 82%,0 100%); transform: translateY(0); }
-  84% { clip-path: polygon(0 0,100% 0,100% 24%,85% 15%,70% 6%,60% 1%,50% 0%,40% 1%,30% 6%,15% 15%,0 24%); transform: translateY(0); }
-  100% { clip-path: polygon(0 0,100% 0,100% 24%,85% 15%,70% 6%,60% 1%,50% 0%,40% 1%,30% 6%,15% 15%,0 24%); transform: translateY(-27%); }
-}
+.intro .curtain { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
+.intro .curtain > svg { display: block; width: 100%; height: 100%; }
 
 .intro .mark { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); transform-origin: center; }
 .intro .mark svg { display: block; width: min(360px, 70vw); height: auto; fill: var(--ink); }
@@ -166,6 +159,7 @@ main { transition: opacity 300ms ease; }
     <p>PT Sigma Models Bali</p>
   </footer>
 </main>
+<script src="silk-curtain.js"></script>
 <script>
 (() => {
   const q = new URLSearchParams(location.search);
@@ -175,7 +169,7 @@ main { transition: opacity 300ms ease; }
     sessionStorage.setItem('sigma-links-intro', '1');
   } catch (_) {}
   const target = document.querySelector('.top svg');
-  if (!target) return;
+  if (!target || !window.createSigmaCurtain) return;
   const intro = document.createElement('div');
   intro.className = 'intro';
   intro.innerHTML = '<div class="curtain" aria-hidden="true"></div><div class="mark" aria-hidden="true"></div><button type="button" class="skip" aria-label="Skip introduction">Skip</button>';
@@ -183,9 +177,11 @@ main { transition: opacity 300ms ease; }
   mark.appendChild(target.cloneNode(true));
   document.body.appendChild(intro);
   document.body.classList.add('intro-on');
+  const fabric = createSigmaCurtain(intro.querySelector('.curtain'), 'img/silk.jpg');
   const timers = [];
   const later = (ms, fn) => timers.push(setTimeout(fn, ms));
   const finish = () => {
+    fabric.destroy();
     timers.forEach(clearTimeout);
     document.body.classList.remove('intro-on');
     intro.remove();
@@ -196,8 +192,8 @@ main { transition: opacity 300ms ease; }
   intro.addEventListener('keydown', e => { if (e.key === 'Escape') finish(); });
   document.querySelector('main').addEventListener('focusin', finish, {once: true});
   window.addEventListener('resize', finish, {once: true});
-  later(100, () => intro.classList.add('open'));
-  later(1150, () => {
+  later(100, () => { intro.classList.add('open'); fabric.play(1200); });
+  later(1350, () => {
     const a = mark.getBoundingClientRect(), b = target.getBoundingClientRect();
     const dx = b.left + b.width / 2 - a.left - a.width / 2;
     const dy = b.top + b.height / 2 - a.top - a.height / 2;
