@@ -18,7 +18,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400..500&family=Jost:wght@300;400;500&display=swap"></noscript>
 <link rel="preload" as="image" href="img/title.webp">
 <link rel="preload" as="image" href="img/candles.jpg">
-<!-- Sigma link-in-bio page for Instagram. Self-contained: no site.css, no scripts. Look follows v6 (ivory, Bodoni Moda + Jost, rouge, pills). -->
+<!-- Sigma link-in-bio page for Instagram. Self-contained: inline styles and a small intro script. Look follows v6 (ivory, Bodoni Moda + Jost, rouge, pills). -->
 <style>
 :root { --bg: #f4efe8; --bg-2: #ebe3d9; --bg-3: #e2d7ca; --ink: #1a1412; --ink-2: #6e625b; --rouge: #d91f3c; --rouge-2: #b8162f;
   --serif: 'Bodoni Moda', Didot, 'Bodoni 72', Georgia, serif; --sans: 'Jost', Futura, 'Helvetica Neue', Arial, sans-serif; color-scheme: light; }
@@ -69,12 +69,21 @@ main { width: 100%; max-width: 480px; margin: 0 auto; padding: max(28px, env(saf
 
 footer { margin-top: 30px; text-align: center; color: var(--ink-2); font-size: 13px; }
 footer a { display: inline-block; padding: 8px 10px; text-decoration: underline; text-underline-offset: 4px; }
-/* opening: the Sigma wordmark appears in the middle of the screen, rises to its place, then everything else appears. CSS only. */
-.top svg { animation: rise 1.4s cubic-bezier(.7, 0, .2, 1) both; transform-origin: 50% 50%; }
-.top p, main > *:not(.top) { animation: appear .6s cubic-bezier(.2, 0, 0, 1) 1.05s both; }
-@keyframes rise { 0% { opacity: 0; transform: translateY(34vh) scale(1.5); } 28%, 52% { opacity: 1; transform: translateY(34vh) scale(1.5); } 100% { opacity: 1; transform: none; } }
-@keyframes appear { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .buy { animation: none; } .row { transition: none; } .top svg, .top p, main > *:not(.top) { animation: none; } }
+/* A small silk still moves upward with CSS; no video or rendering library. */
+.intro { position: fixed; inset: 0; z-index: 10; background: var(--bg); }
+.intro .curtain { position: absolute; inset: -1% 0; z-index: 1; background: #080808 url(img/silk.jpg) center / cover; transform: translateY(0); transition: transform 1000ms cubic-bezier(.65, 0, .22, 1); }
+.intro .curtain::after { content: ""; position: absolute; inset: auto 0 0; height: 80px; background: linear-gradient(transparent, rgba(0,0,0,.6)); }
+.intro.open .curtain { transform: translateY(-102%); }
+.intro .mark { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); transform-origin: center; }
+.intro .mark svg { display: block; width: min(360px, 70vw); height: auto; fill: var(--ink); }
+.intro.rise { background: transparent; transition: background 300ms ease 300ms; }
+.intro.rise .mark { transition: transform 600ms cubic-bezier(.7, 0, .2, 1); }
+.intro .skip { position: absolute; z-index: 2; bottom: max(20px, env(safe-area-inset-bottom)); right: 16px; padding: 12px; border: 0; background: none; color: #fff; font: 400 11px var(--sans); letter-spacing: .2em; text-transform: uppercase; cursor: pointer; }
+.intro.open .skip { color: var(--ink-2); transition: color 200ms ease 300ms; }
+.intro-on { overflow: hidden; }
+.intro-on main { opacity: 0; }
+main { transition: opacity 300ms ease; }
+@media (prefers-reduced-motion: reduce) { .buy { animation: none; } .row, main { transition: none; } .intro { display: none; } .intro-on main { opacity: 1; } .intro-on { overflow: auto; } }
 </style>
 </head>
 <body>
@@ -150,5 +159,47 @@ footer a { display: inline-block; padding: 8px 10px; text-decoration: underline;
     <p>PT Sigma Models Bali</p>
   </footer>
 </main>
+<script>
+(() => {
+  const q = new URLSearchParams(location.search);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches || q.has('nointro')) return;
+  try {
+    if (sessionStorage.getItem('sigma-links-intro') && !q.has('intro')) return;
+    sessionStorage.setItem('sigma-links-intro', '1');
+  } catch (_) {}
+  const target = document.querySelector('.top svg');
+  if (!target) return;
+  const intro = document.createElement('div');
+  intro.className = 'intro';
+  intro.innerHTML = '<div class="curtain" aria-hidden="true"></div><div class="mark" aria-hidden="true"></div><button type="button" class="skip" aria-label="Skip introduction">Skip</button>';
+  const mark = intro.querySelector('.mark');
+  mark.appendChild(target.cloneNode(true));
+  document.body.appendChild(intro);
+  document.body.classList.add('intro-on');
+  const timers = [];
+  const later = (ms, fn) => timers.push(setTimeout(fn, ms));
+  const finish = () => {
+    timers.forEach(clearTimeout);
+    document.body.classList.remove('intro-on');
+    intro.remove();
+    window.removeEventListener('resize', finish);
+  };
+  intro.querySelector('.skip').addEventListener('click', finish);
+  // Keyboard users can reach the links immediately, without tabbing behind the curtain.
+  intro.addEventListener('keydown', e => { if (e.key === 'Escape') finish(); });
+  document.querySelector('main').addEventListener('focusin', finish, {once: true});
+  window.addEventListener('resize', finish, {once: true});
+  later(100, () => intro.classList.add('open'));
+  later(1150, () => {
+    const a = mark.getBoundingClientRect(), b = target.getBoundingClientRect();
+    const dx = b.left + b.width / 2 - a.left - a.width / 2;
+    const dy = b.top + b.height / 2 - a.top - a.height / 2;
+    intro.classList.add('rise');
+    mark.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${b.width / a.width})`;
+    later(300, () => document.body.classList.remove('intro-on'));
+    later(650, finish);
+  });
+})();
+</script>
 </body>
 </html>
